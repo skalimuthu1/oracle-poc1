@@ -1,0 +1,34 @@
+-- 00_create_user_and_schema.sql
+-- Create APP schema in PDB (FREEPDB1 for oracle-free, XEPDB1 for XE)
+
+-- Switch to PDB only if we are currently in CDB$ROOT
+DECLARE
+  v_con VARCHAR2(128) := SYS_CONTEXT('USERENV','CON_NAME');
+BEGIN
+  IF v_con = 'CDB$ROOT' THEN
+    EXECUTE IMMEDIATE 'ALTER SESSION SET CONTAINER = FREEPDB1';
+  END IF;
+END;
+/
+
+-- Drop user if exists (safe re-run)
+BEGIN
+  EXECUTE IMMEDIATE 'DROP USER APP CASCADE';
+EXCEPTION
+  WHEN OTHERS THEN
+    IF SQLCODE != -1918 THEN -- ORA-01918: user does not exist
+      RAISE;
+    END IF;
+END;
+/
+
+-- Create APP user/schema
+CREATE USER APP IDENTIFIED BY "app_123";
+
+-- Grants & quota
+GRANT CONNECT, RESOURCE TO APP;
+GRANT CREATE VIEW, CREATE SEQUENCE, CREATE TRIGGER, CREATE SYNONYM TO APP;
+ALTER USER APP QUOTA UNLIMITED ON USERS;
+
+-- Work in APP by default (no slash here — simple DDL/ALTER)
+ALTER SESSION SET CURRENT_SCHEMA = APP;

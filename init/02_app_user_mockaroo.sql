@@ -12,6 +12,7 @@ END;
 /
 ALTER SESSION SET CURRENT_SCHEMA = APP;
 
+-- Code to generate and insert 10 million records to APP_USER_TABLE1
 SET SERVEROUTPUT ON
 DECLARE
     v_start_time PLS_INTEGER;
@@ -65,10 +66,9 @@ BEGIN
 END;
 /
 
+COMMIT;
 
-CREATE INDEX idx_user_state_zip 
-ON APP_USER_TABLE2 (STATE, ZIPCODE);
-
+-- Code to copy contents to APP_USER_TABLE2 using Direct-path load.
 SET SERVEROUTPUT ON
 DECLARE
     v_start_time PLS_INTEGER;
